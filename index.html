@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nibble Snake // Cheerful Garden Adventure & CyberSnake</title>
+  
+  <!-- PWA & Mobile Web App Capabilities -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="theme-color" content="#7DA07A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Snake">
+  <meta name="application-name" content="Snake">
+
+  <!-- Social Preview Metadata -->
+  <meta property="og:title" content="Nibble Snake & CyberSnake">
+  <meta property="og:description" content="Retro Snake arcade game with 2D & 3D Three.js modes, synthesized Web Audio sound, and Garden/Cyber themes.">
+  <meta property="og:type" content="website">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="pastel-container">
+    <!-- Top Action Bar: Sound, View & Theme Switches -->
+    <div class="top-bar">
+      <button type="button" id="sound-toggle" class="top-bar-btn sound-toggle-btn" role="switch" aria-checked="true" aria-label="Toggle sound: currently ON">
+        <span class="btn-icon" id="sound-toggle-icon" aria-hidden="true">🔊</span>
+        <span class="btn-label" id="sound-toggle-label">Sound</span>
+      </button>
+      <button type="button" id="view-toggle" class="top-bar-btn view-toggle-btn" role="switch" aria-checked="false" aria-label="Toggle 2D or 3D view: currently 2D">
+        <span class="btn-icon" id="view-toggle-icon" aria-hidden="true">🎮</span>
+        <span class="btn-label" id="view-toggle-label">2D View</span>
+      </button>
+      <button type="button" id="theme-toggle" class="top-bar-btn theme-toggle-btn" role="switch" aria-checked="false" aria-label="Toggle theme: Garden (Light) or Cyber (Dark)">
+        <span class="btn-icon" id="theme-toggle-icon" aria-hidden="true">☀️</span>
+        <span class="btn-label" id="theme-toggle-label">Garden</span>
+      </button>
+    </div>
+
+    <!-- Friendly Header & Cheerful Scorecard -->
+    <header class="game-header">
+      <div class="brand-row">
+        <span class="game-tag" id="brand-tag">🌱 Garden Nibble</span>
+        <span class="status-pill" id="game-state-indicator">READY</span>
+      </div>
+
+      <!-- Playful Score Display -->
+      <div class="score-card">
+        <div class="score-primary">
+          <span class="score-label" id="score-label">SNACKS EATEN</span>
+          <span class="score-number" id="score-val">0</span>
+        </div>
+        <div class="score-secondary">
+          <span class="sub-label" id="best-label">BEST FEAST</span>
+          <span class="sub-number" id="best-score-val">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Canvas Garden Playfield -->
+    <section class="screen-container" aria-label="Garden Playfield">
+      <div class="canvas-wrapper">
+        <canvas id="snake-canvas" width="300" height="300" aria-label="Nibble snake garden grid" role="img"></canvas>
+        <canvas id="three-canvas" width="300" height="300" class="hidden" aria-label="Nibble snake 3D viewport" role="img"></canvas>
+
+        <!-- Cheerful Message Overlay -->
+        <div id="lcd-message-overlay" class="garden-overlay" aria-live="polite">
+          <div class="overlay-title" id="overlay-title">READY TO SNACK?</div>
+          <div class="overlay-sub" id="overlay-sub">Press Play or any Arrow key to begin!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Friendly, Readable Controls Area -->
+    <section class="controls-area" aria-label="Game Controls">
+      <!-- Soft Action Buttons: Play/Pause & Start Over -->
+      <div class="action-buttons-row">
+        <button type="button" id="btn-start-pause" class="pastel-btn action-btn" aria-label="Play or Pause game">
+          <span class="btn-label">PLAY / PAUSE</span>
+        </button>
+        <button type="button" id="btn-reset" class="pastel-btn action-btn" aria-label="Start over">
+          <span class="btn-label">START OVER</span>
+        </button>
+      </div>
+
+      <!-- Large Cheerful Directional Pad -->
+      <div class="dpad-grid" role="group" aria-label="Directional Controls">
+        <button type="button" id="btn-up" class="pastel-btn dpad-btn dpad-up" aria-label="Move Up">
+          <span class="arrow-glyph" aria-hidden="true">&#9650;</span>
+          <span class="key-hint">W / ▲</span>
+        </button>
+        <button type="button" id="btn-left" class="pastel-btn dpad-btn dpad-left" aria-label="Move Left">
+          <span class="arrow-glyph" aria-hidden="true">&#9664;</span>
+          <span class="key-hint">A / ◀</span>
+        </button>
+        <div class="dpad-center" aria-hidden="true"></div>
+        <button type="button" id="btn-right" class="pastel-btn dpad-btn dpad-right" aria-label="Move Right">
+          <span class="arrow-glyph" aria-hidden="true">&#9654;</span>
+          <span class="key-hint">D / ▶</span>
+        </button>
+        <button type="button" id="btn-down" class="pastel-btn dpad-btn dpad-down" aria-label="Move Down">
+          <span class="arrow-glyph" aria-hidden="true">&#9660;</span>
+          <span class="key-hint">S / ▼</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Friendly Guidance & Inclusive Tips -->
+    <aside class="guidance-panel">
+      <h2 id="guidance-title">HOW TO PLAY</h2>
+      <p id="guidance-controls"><strong>Move:</strong> <kbd>Arrow Keys</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></p>
+      <p id="guidance-pause"><strong>Take a Break / Pause:</strong> <kbd>Space</kbd> or <kbd>P</kbd></p>
+      <p id="guidance-reset"><strong>Try Again:</strong> <kbd>R</kbd></p>
+      <p id="guidance-sound"><strong>Sound:</strong> <kbd>M</kbd> or Top Button</p>
+      <p id="guidance-view"><strong>View Mode:</strong> <kbd>V</kbd> or Top Button</p>
+      <p id="guidance-tip"><strong>Friendly Tip:</strong> Collect sweet berries to grow longer. Be gentle and watch out for fences and your own tail!</p>
+    </aside>
+  </main>
+
+  <!-- Optional Three.js 3D Viewport Library (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

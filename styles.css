@@ -1,0 +1,617 @@
+/* ==========================================================================
+   Nibble Snake // Playful Pastel Garden Stylesheet
+   Soft Pastel Tones • Cheerful Rounded Shapes • High Readability Contrast
+   Respects prefers-reduced-motion
+   ========================================================================== */
+
+/* Resets and Base Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Theme: Garden Nibble (Light / Default) */
+:root,
+body.theme-garden {
+  --bg-field: #f7f5fb;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f0f8;
+  --border-soft: #e2def0;
+  --border-active: #c4b5fd;
+
+  --text-dark: #1e1b4b;       /* Deep rich indigo (>12:1 contrast ratio) */
+  --text-subtle: #4b5563;     /* Readable slate */
+  --text-muted: #6b7280;      /* Gentle guide text */
+
+  --accent-primary: #e11d48;  /* Berry snack score */
+  --accent-badge: #065f46;    /* Garden green text */
+  --accent-badge-bg: #ecfdf5; /* Soft mint pill */
+  --accent-badge-border: #a7f3d0;
+  --accent-glyph: #7c3aed;    /* Violet directional arrows */
+  --accent-glow: rgba(124, 58, 237, 0.2);
+
+  --btn-bg: #ffffff;
+  --btn-bg-hover: #f3f0fa;
+  --btn-bg-active: #e9e5f5;
+  --btn-border: #d4cee6;
+  --btn-shadow: 0 4px 10px rgba(82, 63, 109, 0.08);
+
+  --focus-ring: #7c3aed;
+
+  --card-radius: 18px;
+  --btn-radius: 14px;
+  --action-btn-radius: 20px;
+  --dpad-radius: 16px;
+  --canvas-radius: 18px;
+
+  --canvas-bg: #ecfdf5;
+  --canvas-border: #cbd5e1;
+  --canvas-shadow: 0 8px 24px rgba(71, 85, 105, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.02);
+
+  --overlay-bg: rgba(255, 255, 255, 0.94);
+  --overlay-title-color: #1e1b4b;
+  --overlay-sub-color: #4b5563;
+
+  --dpad-center-bg: radial-gradient(circle, #e9d5ff 25%, transparent 70%);
+
+  --kbd-bg: #f3f0fa;
+  --kbd-border: #d4cee6;
+  --kbd-color: #1e1b4b;
+
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Nunito", "Quicksand", sans-serif;
+  --font-mono: inherit;
+  --score-shadow: none;
+}
+
+/* Theme: CyberSnake (Dark Terminal) */
+body.theme-cyber {
+  --bg-field: #05070c;
+  --bg-surface: #0b0f19;
+  --bg-elevated: #111726;
+  --border-soft: #1a233a;
+  --border-active: #233152;
+
+  --text-dark: #f0f6fc;       /* High-contrast terminal white */
+  --text-subtle: #8b9bb4;     /* Crisp terminal cyan-slate */
+  --text-muted: #8b9bb4;
+
+  --accent-primary: #00f0ff;  /* Neon cyan score */
+  --accent-badge: #00f0ff;
+  --accent-badge-bg: rgba(0, 240, 255, 0.1);
+  --accent-badge-border: rgba(0, 240, 255, 0.3);
+  --accent-glyph: #00f0ff;
+  --accent-glow: rgba(0, 240, 255, 0.35);
+
+  --btn-bg: #111726;
+  --btn-bg-hover: #162035;
+  --btn-bg-active: #0c121e;
+  --btn-border: #233152;
+  --btn-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+
+  --focus-ring: #00f0ff;
+
+  --card-radius: 6px;
+  --btn-radius: 6px;
+  --action-btn-radius: 6px;
+  --dpad-radius: 6px;
+  --canvas-radius: 8px;
+
+  --canvas-bg: #080c14;
+  --canvas-border: #233152;
+  --canvas-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 240, 255, 0.08);
+
+  --overlay-bg: rgba(7, 10, 16, 0.92);
+  --overlay-title-color: #00f0ff;
+  --overlay-sub-color: #8b9bb4;
+
+  --dpad-center-bg: radial-gradient(circle, #151d2e 30%, transparent 70%);
+
+  --kbd-bg: #111726;
+  --kbd-border: #233152;
+  --kbd-color: #00f0ff;
+
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  --font-mono: "Courier New", Courier, monospace;
+  --score-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+html {
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-field);
+  color: var(--text-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px 12px;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Central Layout Container */
+.pastel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* ==========================================================================
+   Top Action Bar: Sound, View & Theme Switches
+   ========================================================================== */
+.top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.top-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 10px;
+  min-height: 40px;
+  background: var(--btn-bg);
+  color: var(--text-dark);
+  border: 2px solid var(--btn-border);
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: var(--btn-shadow);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.08s ease;
+  user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.top-bar-btn:hover {
+  background: var(--btn-bg-hover);
+  border-color: var(--border-active);
+  transform: translateY(-1px);
+}
+
+.top-bar-btn:active {
+  background: var(--btn-bg-active);
+  transform: translateY(1px);
+}
+
+.top-bar-btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.top-bar-btn .btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.sound-toggle-btn[aria-checked="false"] {
+  opacity: 0.75;
+  border-style: dashed;
+}
+
+.view-toggle-btn[aria-checked="true"] {
+  border-color: var(--border-active);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.view-toggle-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Header & Scorecard
+   ========================================================================== */
+.game-header {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.brand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.game-tag {
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-dark);
+  font-family: var(--font-mono);
+}
+
+.status-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background-color: var(--accent-badge-bg);
+  color: var(--accent-badge);
+  border: 1.5px solid var(--accent-badge-border);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-family: var(--font-mono);
+}
+
+/* Score Card */
+.score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-soft);
+  border-radius: var(--card-radius);
+  padding: 12px 18px;
+  box-shadow: var(--btn-shadow);
+  transition: border-radius 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.score-primary {
+  display: flex;
+  flex-direction: column;
+}
+
+.score-primary .score-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+}
+
+.score-primary .score-number {
+  font-size: 2.2rem;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--accent-primary);
+  text-shadow: var(--score-shadow);
+  font-family: var(--font-mono);
+}
+
+.score-secondary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.score-secondary .sub-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+}
+
+.score-secondary .sub-number {
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--text-dark);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   Canvas Playfield (Unclipped 300x300 Layout)
+   ========================================================================== */
+.screen-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.canvas-wrapper {
+  position: relative;
+  box-sizing: content-box;
+  width: 300px;
+  height: 300px;
+  padding: 4px;
+  background-color: var(--canvas-bg);
+  border: 3px solid var(--canvas-border);
+  border-radius: var(--canvas-radius);
+  box-shadow: var(--canvas-shadow);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease;
+}
+
+.canvas-wrapper:hover {
+  border-color: var(--border-active);
+}
+
+#snake-canvas,
+#three-canvas {
+  display: block;
+  width: 300px;
+  height: 300px;
+  border-radius: calc(var(--canvas-radius) - 4px);
+  background-color: var(--canvas-bg);
+}
+
+.canvas-wrapper canvas.hidden {
+  display: none !important;
+}
+
+/* Message Overlay */
+.garden-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 16px;
+  border-radius: calc(var(--canvas-radius) - 3px);
+  transition: background-color 0.2s ease;
+}
+
+.garden-overlay.hidden {
+  display: none;
+}
+
+.overlay-title {
+  font-size: 1.18rem;
+  font-weight: 900;
+  color: var(--text-dark);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.overlay-sub {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-subtle);
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+/* ==========================================================================
+   Controls Area
+   ========================================================================== */
+.controls-area {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Base Button */
+.pastel-btn {
+  background: var(--btn-bg);
+  color: var(--text-dark);
+  border: 2px solid var(--btn-border);
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-shadow);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.08s ease, background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.08s ease;
+  font-family: inherit;
+}
+
+.pastel-btn:hover {
+  background: var(--btn-bg-hover);
+  border-color: var(--border-active);
+  transform: translateY(-1px);
+}
+
+.pastel-btn:active {
+  background: var(--btn-bg-active);
+  transform: translateY(1.5px);
+}
+
+/* High-Contrast Keyboard Focus */
+.pastel-btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 10px var(--accent-glow);
+  z-index: 10;
+}
+
+/* Action Buttons Row */
+.action-buttons-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 11px 10px;
+  border-radius: var(--action-btn-radius);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  font-family: var(--font-mono);
+}
+
+/* Directional Pad Grid */
+.dpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 62px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.dpad-btn {
+  width: 62px;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--dpad-radius);
+}
+
+.dpad-btn .arrow-glyph {
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--accent-glyph);
+}
+
+.dpad-btn .key-hint {
+  font-size: 0.65rem;
+  color: var(--text-subtle);
+  font-weight: 800;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+}
+
+/* Grid assignments */
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+  width: 100%;
+  height: 100%;
+  background: var(--dpad-center-bg);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* ==========================================================================
+   Guidance / Instructions Panel
+   ========================================================================== */
+.guidance-panel {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-soft);
+  border-radius: var(--card-radius);
+  padding: 14px 16px;
+  width: 100%;
+  font-size: 0.82rem;
+  color: var(--text-subtle);
+  line-height: 1.5;
+  box-shadow: var(--btn-shadow);
+  transition: border-radius 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.guidance-panel h2 {
+  font-size: 0.84rem;
+  letter-spacing: 0.8px;
+  color: var(--text-dark);
+  font-weight: 800;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+
+.guidance-panel p {
+  margin-bottom: 4px;
+}
+
+.guidance-panel p:last-child {
+  margin-bottom: 0;
+}
+
+kbd {
+  background: var(--kbd-bg);
+  color: var(--kbd-color);
+  border: 1.5px solid var(--kbd-border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   Reduced Motion Support
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .canvas-wrapper,
+  .pastel-btn,
+  .top-bar-btn,
+  .theme-toggle-btn {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Responsive Adaptations (Small Screen Support)
+   ========================================================================== */
+@media (max-width: 350px) {
+  body {
+    padding: 10px 4px;
+  }
+
+  .canvas-wrapper {
+    width: 280px;
+    height: 280px;
+  }
+
+  #snake-canvas {
+    width: 280px;
+    height: 280px;
+  }
+
+  .dpad-grid {
+    grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(3, 50px);
+    gap: 6px;
+  }
+
+  .dpad-btn {
+    width: 56px;
+    height: 50px;
+  }
+}

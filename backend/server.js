@@ -7,7 +7,7 @@ import { listScores, saveScore } from './db.js'
 
 const app = express()
 const port = Number(process.env.PORT) || 3000
-const host = '127.0.0.1'
+const host = '0.0.0.0'
 const backendDir = dirname(fileURLToPath(import.meta.url))
 const appDir = resolve(backendDir, '..')
 

@@ -692,7 +692,9 @@ class Snake3DRenderer {
           meshMat.color.setHex(isHead ? 0x00f0ff : 0x151d2e);
           meshMat.emissive.setHex(isHead ? 0x004455 : 0x002233);
         } else {
-          meshMat.color.setHex(isHead ? 0x059669 : 0x34d399);
+          const headHex = parseInt(themeConfig.SNAKE_HEAD.replace('#', '0x'), 16) || 0x059669;
+          const bodyHex = parseInt(themeConfig.SNAKE_BODY.replace('#', '0x'), 16) || 0x34d399;
+          meshMat.color.setHex(isHead ? headHex : bodyHex);
           meshMat.emissive.setHex(0x000000);
         }
       } else {
@@ -1046,6 +1048,20 @@ class SoundEngine {
 }
 
 /**
+ * Round Coach Client: Requests coach advice from relative endpoint /api/coach.
+ */
+async function requestCoachTip(round) {
+  const response = await fetch('/api/coach', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(round)
+  })
+
+  if (!response.ok) throw new Error(`Coach request failed: ${response.status}`)
+  return response.json()
+}
+
+/**
  * ==========================================================================
  * 4. Game Controller (DOM, Sound, and User Inputs)
  * ==========================================================================
@@ -1111,6 +1127,7 @@ class GameController {
     this.setViewMode(this.viewMode);
     this.updateUI();
     this.renderActiveView();
+    initWeather();
   }
 
   /**
@@ -1554,6 +1571,23 @@ class GameController {
     this.updateUI();
     this.soundEngine.stopBgm();
     this.soundEngine.playGameOver(this.theme);
+    showScoreForm(this.engine.score);
+
+    // Request round coach advice via relative path /api/coach
+    const endedBy = (result.reason || 'unknown').toLowerCase();
+    requestCoachTip({ score: this.engine.score, endedBy })
+      .then(data => {
+        if (data && data.tip && this.overlaySubEl && !this.overlayEl.classList.contains('hidden')) {
+          const sourceTag = data.source === 'provider' ? 'provider' : 'local rule';
+          this.overlaySubEl.innerText = `${subText}\n💡 Coach (${sourceTag}): ${data.tip}\n${t.overlayRestartHint}`;
+        }
+      })
+      .catch(() => {
+        // Safe non-blocking fallback: game is not affected if server is offline or fails
+        if (this.overlaySubEl && !this.overlayEl.classList.contains('hidden')) {
+          this.overlaySubEl.innerText = `${subText}\nTip unavailable. Your score is still saved locally.\n${t.overlayRestartHint}`;
+        }
+      });
   }
 
   showOverlay(title, subtitle) {
@@ -1589,16 +1623,274 @@ class GameController {
   }
 }
 
+/**
+ * Loads external game configuration (speed, snakeColor) from ./game-data.json before startup.
+ * Falls back safely to internal defaults if missing, broken, or containing invalid types.
+ */
+async function loadGameData() {
+  const indicator = document.getElementById('game-state-indicator');
+  if (indicator) {
+    indicator.textContent = 'CONFIG...';
+  }
+
+  try {
+    const response = await fetch('./game-data.json');
+    if (!response.ok) {
+      if (indicator) indicator.textContent = 'CFG DEF';
+      return;
+    }
+
+    const data = await response.json();
+    let hasValidData = false;
+
+    // Validate speed: must be a reasonable finite number between 50ms and 500ms
+    if (typeof data.speed === 'number' && Number.isFinite(data.speed) && data.speed >= 50 && data.speed <= 500) {
+      CONFIG.TICK_INTERVAL_MS = Math.round(data.speed);
+      hasValidData = true;
+    }
+
+    // Validate snakeColor: must be a non-empty string
+    if (typeof data.snakeColor === 'string' && data.snakeColor.trim().length > 0) {
+      CONFIG.THEMES.garden.SNAKE_BODY = data.snakeColor.trim();
+      hasValidData = true;
+    }
+
+    if (indicator) {
+      indicator.textContent = hasValidData ? 'CFG OK' : 'CFG DEF';
+    }
+  } catch {
+    // Missing file, network error, or malformed JSON syntax
+    if (indicator) {
+      indicator.textContent = 'CFG DEF';
+    }
+  }
+}
+
+let weatherFetchInitiated = false;
+
+/**
+ * Asynchronously loads live weather for Jodhpur from Open-Meteo API.
+ * Updates an element with role="status", checking response.ok and validating units.
+ * Completely non-blocking so Snake game remains immediately playable.
+ */
+async function initWeather() {
+  if (weatherFetchInitiated) return;
+
+  const weatherTextEl = document.getElementById('weather-text');
+  if (!weatherTextEl) {
+    // If DOM is still loading, retry as soon as DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => initWeather(), { once: true });
+    }
+    return;
+  }
+
+  weatherFetchInitiated = true;
+
+  // 1. Loading state
+  weatherTextEl.textContent = '⏳ Loading live weather for Jodhpur...';
+
+  // 2. Fetch from Open-Meteo (no API key or secret required)
+  const endpoint = 'https://api.open-meteo.com/v1/forecast?latitude=26.2389&longitude=73.0243&current=temperature_2m,wind_speed_10m&timezone=auto';
+
+  try {
+    const response = await fetch(endpoint);
+    if (!response.ok) {
+      weatherTextEl.textContent = '⚠️ Weather currently unavailable • Game ready to play';
+      return;
+    }
+
+    const data = await response.json();
+
+    // 3. Validate temperature, wind speed, and their units
+    const current = data && data.current;
+    const units = data && data.current_units;
+
+    const isTempValid = current && typeof current.temperature_2m === 'number' && Number.isFinite(current.temperature_2m);
+    const isWindValid = current && typeof current.wind_speed_10m === 'number' && Number.isFinite(current.wind_speed_10m);
+    const isTempUnitValid = units && typeof units.temperature_2m === 'string' && units.temperature_2m.trim().length > 0;
+    const isWindUnitValid = units && typeof units.wind_speed_10m === 'string' && units.wind_speed_10m.trim().length > 0;
+
+    if (isTempValid && isWindValid && isTempUnitValid && isWindUnitValid) {
+      // 4. Success state
+      const temp = current.temperature_2m;
+      const tempUnit = units.temperature_2m.trim();
+      const wind = current.wind_speed_10m;
+      const windUnit = units.wind_speed_10m.trim();
+
+      weatherTextEl.textContent = `🌤️ ${temp} ${tempUnit} • Wind: ${wind} ${windUnit}`;
+    } else {
+      // 5. Validation failure error state
+      weatherTextEl.textContent = '⚠️ Weather data format invalid • Game ready to play';
+    }
+  } catch {
+    // 6. Network / offline error state
+    weatherTextEl.textContent = '⚠️ Weather currently unavailable • Game ready to play';
+  }
+}
+
+/**
+ * ==========================================================================
+ * Leaderboard Client & State Management
+ * ==========================================================================
+ */
+let lastRoundScore = 0;
+
+async function loadScores() {
+  const response = await fetch('/api/scores')
+  if (!response.ok) throw new Error(`Score request failed: ${response.status}`)
+  const data = await response.json()
+  return data.scores
+}
+
+async function submitScore(name, score) {
+  const response = await fetch('/api/scores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, score })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.error || 'Score could not be saved')
+  return data.score
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/**
+ * Fetches top scores from /api/scores.
+ * Displays loading, empty, success, or failure states and never leaves an endless loading state.
+ */
+async function fetchTopScores() {
+  const bodyEl = document.getElementById('leaderboard-body');
+  if (!bodyEl) return;
+
+  // 1. Loading State
+  bodyEl.innerHTML = '<p class="leaderboard-status" role="status">⏳ Loading top scores...</p>';
+
+  try {
+    const scores = await loadScores();
+
+    if (!Array.isArray(scores) || scores.length === 0) {
+      // 2. Empty State
+      bodyEl.innerHTML = '<p class="leaderboard-empty">No scores recorded yet. Play a round and save your score to set the first record!</p>';
+    } else {
+      // 3. Success State
+      const itemsHtml = scores.map((item, idx) => {
+        const safeName = escapeHtml(item.name || 'Anonymous');
+        const scoreVal = Number.isInteger(item.score) ? item.score : 0;
+        return `<li class="leaderboard-item"><span class="leaderboard-rank">#${idx + 1}</span><span class="leaderboard-name">${safeName}</span><span class="leaderboard-score">${scoreVal} pts</span></li>`;
+      }).join('');
+      bodyEl.innerHTML = `<ol class="leaderboard-list">${itemsHtml}</ol>`;
+    }
+  } catch {
+    // 4. Failure State
+    bodyEl.innerHTML = '<p class="leaderboard-error" role="alert">⚠️ Unable to load scores right now.</p>';
+  }
+}
+
+function showScoreForm(score) {
+  lastRoundScore = Number.isInteger(score) && score >= 0 ? score : 0;
+  const formEl = document.getElementById('score-submit-form');
+  const valEl = document.getElementById('score-submit-val');
+  const msgEl = document.getElementById('score-submit-msg');
+  const btnEl = document.getElementById('score-submit-btn');
+  const inputEl = document.getElementById('score-player-name');
+
+  if (!formEl) return;
+
+  if (valEl) valEl.textContent = lastRoundScore;
+  if (msgEl) {
+    msgEl.textContent = '';
+    msgEl.className = 'score-submit-msg';
+  }
+  if (btnEl) btnEl.disabled = false;
+  if (inputEl) inputEl.disabled = false;
+
+  formEl.classList.remove('hidden');
+}
+
+function initLeaderboard() {
+  fetchTopScores();
+
+  const refreshBtn = document.getElementById('btn-refresh-scores');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => fetchTopScores());
+  }
+
+  const formEl = document.getElementById('score-submit-form');
+  if (formEl) {
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inputEl = document.getElementById('score-player-name');
+      const msgEl = document.getElementById('score-submit-msg');
+      const btnEl = document.getElementById('score-submit-btn');
+
+      const name = inputEl ? inputEl.value.trim() : '';
+      if (!name || name.length > 24) {
+        if (msgEl) {
+          msgEl.textContent = 'Name must be 1 to 24 characters.';
+          msgEl.className = 'score-submit-msg error';
+        }
+        return;
+      }
+
+      if (btnEl) btnEl.disabled = true;
+      if (inputEl) inputEl.disabled = true;
+      if (msgEl) {
+        msgEl.textContent = 'Saving...';
+        msgEl.className = 'score-submit-msg';
+      }
+
+      try {
+        await submitScore(name, lastRoundScore);
+
+        if (msgEl) {
+          msgEl.textContent = '🎉 Score saved!';
+          msgEl.className = 'score-submit-msg success';
+        }
+        if (inputEl) inputEl.value = '';
+        fetchTopScores();
+      } catch (err) {
+        if (msgEl) {
+          msgEl.textContent = `⚠️ ${err.message || 'Could not save score.'} Please check connection and try again.`;
+          msgEl.className = 'score-submit-msg error';
+        }
+        if (btnEl) btnEl.disabled = false;
+        if (inputEl) inputEl.disabled = false;
+      }
+    });
+  }
+}
+
 // ==========================================
 // Initialize Game on DOM ready & Register PWA Service Worker
 // ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-  new GameController();
+function startApp() {
+  // Fire weather and leaderboard load immediately without waiting for anything else
+  initWeather();
+  initLeaderboard();
+
+  loadGameData().finally(() => {
+    // Short pause so visible status (CFG OK / CFG DEF) can be observed before transitioning to READY
+    setTimeout(() => {
+      new GameController();
+    }, 300);
+  });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {
       // Offline support gracefully unavailable (e.g. running via file:// protocol)
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}
 

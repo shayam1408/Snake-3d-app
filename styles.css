@@ -567,6 +567,220 @@ kbd {
 }
 
 /* ==========================================================================
+   Weather Status Panel
+   ========================================================================== */
+.weather-panel {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-soft);
+  border-radius: var(--card-radius);
+  padding: 10px 14px;
+  width: 100%;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+  line-height: 1.4;
+  box-shadow: var(--btn-shadow);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-dark);
+  font-family: var(--font-mono);
+}
+
+.weather-body {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.weather-footer {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.weather-attribution {
+  color: var(--accent-glyph);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.weather-attribution:hover {
+  opacity: 0.8;
+}
+
+.weather-attribution:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   Top Scores Leaderboard Panel
+   ========================================================================== */
+.leaderboard-panel {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-soft);
+  border-radius: var(--card-radius);
+  padding: 12px 14px;
+  width: 100%;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  box-shadow: var(--btn-shadow);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leaderboard-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-dark);
+  font-family: var(--font-mono);
+  margin: 0;
+}
+
+.leaderboard-refresh-btn {
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.leaderboard-body {
+  font-size: 0.78rem;
+}
+
+.leaderboard-status,
+.leaderboard-empty {
+  color: var(--text-subtle);
+  font-style: italic;
+  margin: 4px 0;
+}
+
+.leaderboard-error {
+  color: #e11d48;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.leaderboard-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.03);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  color: var(--accent-glyph);
+  margin-right: 6px;
+}
+
+.leaderboard-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-score {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.score-submit-form {
+  border-top: 1px dashed var(--border-soft);
+  padding-top: 8px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.score-form-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+}
+
+.score-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+.score-input {
+  flex: 1;
+  background: var(--bg-surface);
+  color: var(--text-dark);
+  border: 1.5px solid var(--border-soft);
+  border-radius: var(--btn-radius);
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-family: inherit;
+}
+
+.score-input:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.score-submit-btn {
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.score-submit-msg {
+  font-size: 0.72rem;
+  margin: 0;
+  min-height: 1.2em;
+}
+
+.score-submit-msg.success {
+  color: #059669;
+  font-weight: 600;
+}
+
+.score-submit-msg.error {
+  color: #e11d48;
+  font-weight: 600;
+}
+
+/* ==========================================================================
    Reduced Motion Support
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
